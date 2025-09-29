@@ -23,6 +23,10 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { Currencies, Currency } from "@/lib/currencies"
+import { useQuery } from "@tanstack/react-query";
+import SkeletonWrapper from "./SkeletonWrapper"
+import { UserSettings } from "@/generated/prisma"
+
 
 
 export function CurrencyComboBox() {
@@ -32,8 +36,22 @@ export function CurrencyComboBox() {
     null
   )
 
+  const userSettings = useQuery<UserSettings>({
+    queryKey: ["userSettings"],
+    queryFn: () => fetch("/api/user-settings").then((res) => res.json()),
+  });
+
+  React.useEffect(() => {
+    if (!userSettings.data) return;
+    const userCurrency = Currencies.find(
+      (currency) => currency.value === userSettings.data.currency
+    );
+    if (userCurrency) setSelectedOption(userCurrency);
+  }, [userSettings.data]);
+
   if (isDesktop) {
     return (
+      <SkeletonWrapper isLoading={userSettings.isFetching}>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button variant="outline" className="w-full justify-start">
@@ -44,10 +62,12 @@ export function CurrencyComboBox() {
           <OptionList setOpen={setOpen} setSelectedOption={setSelectedOption} />
         </PopoverContent>
       </Popover>
+      </SkeletonWrapper>
     )
   }
 
   return (
+    <SkeletonWrapper isLoading={userSettings.isFetching}>
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
         <Button variant="outline" className="w-full justify-start">
@@ -60,6 +80,7 @@ export function CurrencyComboBox() {
         </div>
       </DrawerContent>
     </Drawer>
+    </SkeletonWrapper>
   )
 }
 
@@ -95,3 +116,4 @@ function OptionList({
     </Command>
   )
 }
+

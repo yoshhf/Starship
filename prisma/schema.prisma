@@ -14,9 +14,9 @@ datasource db {
   url      = "file:./dev.db"
 }
 
-model UserSetting {
-  UserId   String @id
-  Currency String
+model UserSettings {
+  userId   String @id
+  currency String
 }
 
 model Cattegory {
@@ -32,7 +32,7 @@ model Cattegory {
 model Transaction {
   id        String   @id @default(uuid())
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updateAt DateTime @default(now())
 
   amount      Float
   description String
@@ -45,22 +45,22 @@ model Transaction {
 }
 
 model MonthHistory {
-  Userid  String
+  userId  String
   day     Int
   month   Int
   year    Int
   income  Float
   expense Float
 
-  @@unique([Userid, day, month, year])
+  @@id([userId, day, month, year])
 }
 
 model YearHistory {
-  Userid  String
+  userId  String
   month   Int
   year    Int
   income  Float
   expense Float
 
-  @@unique([Userid, month, year])
+  @@id([userId, month, year])
 }
